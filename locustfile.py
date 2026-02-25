@@ -71,7 +71,7 @@ class WebUser(HttpUser):
             )
 
 
-    @task(1)
+    @task(2)
     def delete_book(self):
         if self.book_id:
             self.client.delete(f"/books/{self.book_id}")
