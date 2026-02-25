@@ -107,7 +107,7 @@ async def search_books(
     try:
         cursor.execute(sql, tuple(db_params))
         rows = cursor.fetchall()
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=500, detail="Database query failed")
 
     db_results = [
@@ -124,7 +124,7 @@ async def search_books(
     ]
 
     query_lower = q.lower()
-    ext_results = [
+    ext_results_filtered = [
         book
         for book in books
         if query_lower in book["title"].lower()
@@ -133,10 +133,12 @@ async def search_books(
         or query_lower in str(book["first_publish_year"])
     ]
 
-    all_result = db_results + ext_results
-    total_count = len(all_result)
-    end = (skip + limit) if limit is not None else total_count
-    final_result = all_result[skip:end]
+    all_results = db_results + ext_results_filtered
+    total_count = len(all_results)
+
+    start = skip
+    end = skip + limit if limit is not None else total_count
+    final_result = all_results[start:end]
 
     result = {
         "query": q,
